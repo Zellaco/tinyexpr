@@ -84,12 +84,12 @@ typedef struct state {
 #define NEW_EXPR(type, ...) new_expr((type), (const te_expr*[]){__VA_ARGS__})
 
 
-static double _equal(double a, double b) { return (a == b) ? 1 : 0; }
+/*static double _equal(double a, double b) { return (a == b) ? 1 : 0; }
 static double _not_equal(double a, double b) { return (a != b) ? 1 : 0; }
 static double _less_than(double a, double b) { return (a < b) ? 1 : 0; }
 static double _less_than_equal_to(double a, double b) { return (a <= b) ? 1 : 0; }
 static double _greater_than(double a, double b) { return (a > b) ? 1 : 0; }
-static double _greater_than_equal_to(double a, double b) { return (a >= b) ? 1 : 0; }
+static double _greater_than_equal_to(double a, double b) { return (a >= b) ? 1 : 0; }*/
 static double _and(double a, double b) { return (a && b) ? 1 : 0; }
 static double _or(double a, double b) { return (a || b) ? 1 : 0; }
 static double _not(double a) { return !a; }
