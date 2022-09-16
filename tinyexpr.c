@@ -94,6 +94,19 @@ static double _and(double a, double b) { return (a && b) ? 1 : 0; }
 static double _or(double a, double b) { return (a || b) ? 1 : 0; }
 static double _not(double a) { return !a; }
 
+// Function to get bit set/clear.
+// Return 1.0 if set, 0.0 otherwise
+static double _bit(double a, double b) {
+	return (double)((unsigned int)a & (unsigned int)1 << (unsigned char)b) ? 1.0 : 0.0;
+}
+
+// Function to get a bits value.
+// a is bit number
+static double _bitval(double a) {
+	if ((int)a > 31)
+		return 0.0;
+	return (double)((unsigned int)1 << ((unsigned char)a));
+}
 
 
 static te_expr* new_expr(const int type, const te_expr* parameters[]) {
@@ -103,13 +116,14 @@ static te_expr* new_expr(const int type, const te_expr* parameters[]) {
 	te_expr* ret = malloc(size);
 	if (ret == NULL)
 		return NULL;
-		
+	
 	memset(ret, 0, size);
 	if (arity && parameters) {
 		memcpy(ret->parameters, parameters, psize);
 	}
 	ret->type = type;
 	ret->bound = 0;
+	
 	return ret;
 }
 
@@ -179,6 +193,7 @@ static const te_variable functions[] = {
 	{"asin", asin, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 	{"atan", atan, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 	{"atan2", atan2, TE_FUNCTION2 | TE_FLAG_PURE, 0},
+	{"bitval", _bitval, TE_FUNCTION1 | TE_FLAG_PURE, 0 }, // Get decimal value for bit n
 	{"ceil", ceil, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 	{"cos", cos, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 	{"cosh", cosh, TE_FUNCTION1 | TE_FLAG_PURE, 0},
@@ -186,6 +201,7 @@ static const te_variable functions[] = {
 	{"exp", exp, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 	{"fac", fac, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 	{"floor", floor, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"isbit", _bit, TE_FUNCTION2 | TE_FLAG_PURE, 0},	// Check if bit is set in input
 	{"ln", log, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 #ifdef TE_NAT_LOG
 	{"log", log, TE_FUNCTION1 | TE_FLAG_PURE, 0},
@@ -252,8 +268,8 @@ static double comma(double a, double b) { (void)a; return b; }
 
 void next_token(state* s) {
 	s->type = TOK_NULL;
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wchar-subscripts"	// Remove warning for using char in isalpha
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wchar-subscripts"	// Remove warning for using char in isalpha
 	do {
 
 		if (!*s->next) {
@@ -321,7 +337,7 @@ void next_token(state* s) {
 			}
 		}
 	} while (s->type == TOK_NULL);
-	#pragma GCC diagnostic pop
+//#pragma GCC diagnostic pop
 }
 
 
@@ -620,7 +636,7 @@ static void optimize(te_expr* n) {
 
 
 te_expr* te_compile(const char* expression, const te_variable* variables, int var_count, int* error) {
-	if(!expression)return NULL;
+	if (!expression)return NULL;
 	state s;
 	s.start = s.next = expression;
 	s.lookup = variables;
@@ -658,7 +674,7 @@ double te_interp(const char* expression, int* error) {
 
 static void pn(const te_expr* n, int depth) {
 	int i, arity;
-	if(!n)return;
+	if (!n)return;
 	printf("%*s", depth, "");
 
 	switch (TYPE_MASK(n->type)) {
