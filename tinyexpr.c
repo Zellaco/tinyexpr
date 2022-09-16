@@ -171,26 +171,27 @@ static double npr(double n, double r) { return ncr(n, r) * fac(r); }
 
 static const te_variable functions[] = {
 	/* must be in alphabetical order */
-	{"abs", fabs,     TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"acos", acos,    TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"asin", asin,    TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"atan", atan,    TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"atan2", atan2,  TE_FUNCTION2 | TE_FLAG_PURE, 0},
-	{"ceil", ceil,    TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"cos", cos,      TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"cosh", cosh,    TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"e", e,          TE_FUNCTION0 | TE_FLAG_PURE, 0},
-	{"exp", exp,      TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"fac", fac,      TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"floor", floor,  TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"ln", log,       TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"abs", fabs, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"acos", acos, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"asin", asin, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"atan", atan, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"atan2", atan2, TE_FUNCTION2 | TE_FLAG_PURE, 0},
+	{"ceil", ceil, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"cos", cos, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"cosh", cosh, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"e", e, TE_FUNCTION0 | TE_FLAG_PURE, 0},
+	{"exp", exp, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"fac", fac, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"floor", floor, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"ln", log, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 #ifdef TE_NAT_LOG
-	{"log", log,      TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"log", log, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 #else
-	{"log", log10,    TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"log", log10, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 #endif
-	{"log10", log10,  TE_FUNCTION1 | TE_FLAG_PURE, 0},
-	{"ncr", ncr,      TE_FUNCTION2 | TE_FLAG_PURE, 0},
+	{"log10", log10, TE_FUNCTION1 | TE_FLAG_PURE, 0},
+	{"ncr", ncr, TE_FUNCTION2 | TE_FLAG_PURE, 0},
+	{"not", _not, TE_FUNCTION1 | TE_FLAG_PURE, 0},
 	{"npr", npr,      TE_FUNCTION2 | TE_FLAG_PURE, 0},
 	{"pi", pi,        TE_FUNCTION0 | TE_FLAG_PURE, 0},
 	{"pow", pow,      TE_FUNCTION2 | TE_FLAG_PURE, 0},
@@ -248,7 +249,8 @@ static double comma(double a, double b) { (void)a; return b; }
 
 void next_token(state* s) {
 	s->type = TOK_NULL;
-
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wchar-subscripts"	// Remove warning for using char in isalpha
 	do {
 
 		if (!*s->next) {
@@ -262,6 +264,7 @@ void next_token(state* s) {
 			s->type = TOK_NUMBER;
         } else {
 			/* Look for a variable or builtin function call. */
+
 			if (isalpha(s->next[0])) {
 				const char* start;
 				start = s->next;
@@ -305,7 +308,6 @@ void next_token(state* s) {
 					// Added by JP: 2022-09-12
 				case '&': s->type = TOK_INFIX; s->function = _and; break;
 				case '|': s->type = TOK_INFIX; s->function = _or; break;
-				case '!': s->type = TOK_INFIX; s->function = _not; break;
 
 				case '(': s->type = TOK_OPEN; break;
 				case ')': s->type = TOK_CLOSE; break;
@@ -316,6 +318,7 @@ void next_token(state* s) {
 			}
 		}
 	} while (s->type == TOK_NULL);
+	#pragma GCC diagnostic pop
 }
 
 
