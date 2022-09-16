@@ -101,6 +101,9 @@ static te_expr* new_expr(const int type, const te_expr* parameters[]) {
 	const int psize = sizeof(void*) * arity;
 	const int size = (sizeof(te_expr) - sizeof(void*)) + psize + (IS_CLOSURE(type) ? sizeof(void*) : 0);
 	te_expr* ret = malloc(size);
+	if (ret == NULL)
+		return NULL;
+		
 	memset(ret, 0, size);
 	if (arity && parameters) {
 		memcpy(ret->parameters, parameters, psize);
@@ -617,6 +620,7 @@ static void optimize(te_expr* n) {
 
 
 te_expr* te_compile(const char* expression, const te_variable* variables, int var_count, int* error) {
+	if(!expression)return NULL;
 	state s;
 	s.start = s.next = expression;
 	s.lookup = variables;
@@ -654,6 +658,7 @@ double te_interp(const char* expression, int* error) {
 
 static void pn(const te_expr* n, int depth) {
 	int i, arity;
+	if(!n)return;
 	printf("%*s", depth, "");
 
 	switch (TYPE_MASK(n->type)) {
